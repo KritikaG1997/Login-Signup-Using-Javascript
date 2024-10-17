@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teddy Bear Emoji Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        .teddy-bear {
+            font-size: 100px;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="teddy-bear">🧸</div>
+    <div class="user-info">
+        Welcome, <span id="userName"></span>!
+    </div>
+
+    <script>
+        // Fetch user information from localStorage
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (user) {
+            // Display user's first name
+            document.getElementById('userName').textContent = user.firstName;
+        } else {
+            // If no user is found, redirect to login page
+            window.location.href = "index.html";
+        }
+    </script>
+
+</body>
+
+</html>

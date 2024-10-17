@@ -1,0 +1,19 @@
+{
+  "name": "login-signup-using-javascript",
+  "version": "1.0.0",
+  "description": "**\r Getting Started**",
+  "main": "log_sing_page.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "jwt-decode": "^4.0.0",
+    "validator": "^13.12.0"
+  }
+}

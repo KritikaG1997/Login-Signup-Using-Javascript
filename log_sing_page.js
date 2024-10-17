@@ -1,87 +1,101 @@
-const readline = require("readline-sync");
-const validator = require("validator");
-const fs = require("fs");
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');  // Add this line
+const validator = require("validator")
+const fs = require("fs")
 
-user_choice_input = readline.question("Enter your choice what you want to do login or sign-up: ");
-if(user_choice_input==="signup"){
-    var User_data = {};
-    var userDataInjson = {};
-    var user_first_name  = readline.question("Enter your first name from which you want to creat your account: ");
-    var user_last_name = readline.question("Enter your last name from which you want to creat your account: ");
-    var user_EmailId = readline.question("Enter your valid Email_id: ");
-    var user_set_password = readline.question("Enter a strong password it should have one special corector,one capoital Word and Small, one number from 1 to 9 and alphabate: ");
-    var confirm_password = readline.question(" Re Enter your password for confirm: ");
-    if(validator.isEmail(user_EmailId)){
-      if(user_set_password==confirm_password){
-        function isUpper(str) {
-            return /[A-Z]/.test(str);
-        };
-        function hasLowerCase(str) {
-            return (/[a-z]/.test(str));
-        };
-        function hasSpecialcorrector(myString){
-            return (/[@,#,$,&]/.test(myString));
-        };
-        function hasNumber(myString){
-            return (/[0-9]/.test(myString));
-        };      
-        function checkYourPassword(Your_Paasword){
-            if(Your_Paasword.length>=8 && Your_Paasword.length<=12){
-        
-                if(hasLowerCase(Your_Paasword)){
-        
-                    if(isUpper(Your_Paasword)){
-        
-                        if(hasSpecialcorrector(Your_Paasword)){
-        
-                            if(hasNumber(Your_Paasword)){
-                                
-                                console.log("wow finally you created a strong and secure password for your account: ")
+const app = express();
 
-                                User_data["Firstname"]=user_first_name;
-                                User_data["lastName"] =user_last_name;
-                                User_data["EmailId"]=user_EmailId;
-                                User_data["password"] = confirm_password;
-                                userDataInjson = JSON.stringify(User_data);
-                                fs.writeFile("user_data.json",userDataInjson,(err)=>{
-                                  console.log("Account Created: ")
-                                })
-                            }else{
-                                console.log("in it one numeric also should be there: ")
-                            };
-                        }else{
-                            console.log("There should be one special corrector for making your password more secure: ")
-                        };
-                    }else{
-                        console.log("your password should be have one capital letter: ")
-                    };
-                }else{
-                    console.log("it should be have small corrector: ");
-                };
-            }else{
-                console.log("Password Length should be maximum 8 and lessthan 12: ");
-            };
-        };
-        checkYourPassword(confirm_password);
-      }else{
-        console.log("You both password are not same try again")
-      };
-    }else{
-        console.log("Emain id is not valid try again: ");
+app.use(cors());  // Add this line to enable CORcS for all routes
+app.use(bodyParser.json());
+
+// Utility functions for password validation
+function isUpper(str) {
+    return /[A-Z]/.test(str);
+}
+
+function hasLowerCase(str) {
+    return /[a-z]/.test(str);
+}
+
+function hasSpecialCharacter(str) {
+    return /[@,#,$,&]/.test(str);
+}
+
+function hasNumber(str) {
+    return /[0-9]/.test(str);
+}
+
+function checkPassword(password) {
+    if (password.length >= 8 && password.length <= 12 &&
+        hasLowerCase(password) &&
+        isUpper(password) &&
+        hasSpecialCharacter(password) &&
+        hasNumber(password)) {
+        return true;
+    }
+    return false;
+}
+
+// Signup route
+app.post('/signup', (req, res) => {
+    const { firstName, lastName, email, password, confirmPassword } = req.body;
+
+    // Validate email
+    if (!validator.isEmail(email)) {
+        return res.status(400).json({ message: 'Invalid email address' });
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+        return res.status(400).json({ message: 'Passwords do not match' });
+    }
+
+    // Validate password
+    if (!checkPassword(password)) {
+        return res.status(400).json({ message: 'Password does not meet the criteria' });
+    }
+
+    // Create user object
+    const userData = {
+        firstName,
+        lastName,
+        email,
+        password
     };
-}else if (user_choice_input==="login"){
-    var user_data_obj = {};
-    var user_mailID = readline.question("Enter your valid Email id: ");
-    var user_password = readline.question("Enter your account password: ")
-    var convertInObj = {};
-    fs.readFile("user_data.json","utf-8",(err,data)=>{
-        const value = data.includes(user_mailID);
-        const value2 = data.includes(user_password);
-        if(value==true && value2==true){
-            console.log("yes")
-        }else{
-            console.log("no");
-        };
+
+    // Save user data to JSON file
+    fs.writeFile('user_data.json', JSON.stringify(userData), (err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Failed to create account' });
+        }
+        res.status(201).json({ message: 'Account created successfully' });
     });
-      
-};
+});
+
+// Login route
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+
+    // Read the saved user data
+    fs.readFile('user_data.json', 'utf-8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ message: 'Failed to read user data' });
+        }
+
+        const userData = JSON.parse(data);
+
+        // Check if the email and password match
+        if (userData.email === email && userData.password === password) {
+            return res.status(200).json({ message: 'Login successful' });
+        } else {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+    });
+});
+
+// Start the server
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
