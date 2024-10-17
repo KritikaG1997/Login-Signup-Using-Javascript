@@ -1,15 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cors = require('cors');  // Add this line
+const cors = require('cors');  
 const validator = require("validator")
 const fs = require("fs")
 
 const app = express();
 
-app.use(cors());  // Add this line to enable CORcS for all routes
+app.use(cors());
 app.use(bodyParser.json());
 
-// Utility functions for password validation
 function isUpper(str) {
     return /[A-Z]/.test(str);
 }
@@ -94,7 +93,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-// Start the server
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
